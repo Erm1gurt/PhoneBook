@@ -1,4 +1,6 @@
 import csv
+from prettytable import PrettyTable
+
 
 def views_contact():
     '''
@@ -7,9 +9,11 @@ def views_contact():
     '''
     print('\nСписок контактов')
     with open('database.csv', 'r', encoding='utf-8') as file:
+        headers = file.readline().strip().split(';')
         file_reader = csv.reader(file, delimiter=';')
-        for line in file_reader:
-            print(*line)
+        table = PrettyTable(headers)
+        table.add_rows(sorted(file_reader))
+        print(table)
 
 
 def add_contact():
@@ -20,17 +24,19 @@ def add_contact():
     print('\nДобавить контакт')
     surname = input('Укажите фамилию: ')
     name = input('Укажите имя: ')
-    phone_number = input('Укажите номер телефона: ')
+    patronymic = input('Укажите отчество: ')
+    organisation = input('Укажите ораганизацию: ')
+    work_number = input('Укажите рабочий номер телефона')
+    phone_number = input('Укажите личный номер телефона: ')
     with open('database.csv', 'a', encoding='utf-8') as file:
         file_writer = csv.writer(file, delimiter=';', lineterminator='\r')
-        file_writer.writerow([surname, name, phone_number])
+        file_writer.writerow([surname, name, patronymic, organisation, work_number, phone_number])
     print('\nКонтакт успешно добавлен')
     print('1. Вернуться в главное меню\n2. Добавить контакт')
     move = move_menu(['1', '2'])
     if move == '1':
         main_menu()
     add_contact()
-
 
 
 def edit_contact():
