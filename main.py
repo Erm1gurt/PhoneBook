@@ -4,7 +4,7 @@ from prettytable import PrettyTable
 
 def views_contact():
     '''
-    Функция выводящая контакты
+    Функция выводящая контакты в виде таблицы. На 1 странице может быть выведено до 10 контактов
     :return: None
     '''
     print('\nСписок контактов')
@@ -12,7 +12,6 @@ def views_contact():
         headers = file.readline().strip().split(';')
         file_reader = csv.reader(file, delimiter=';')
         contacts = sorted(file_reader)
-    print(len(contacts))
     table = PrettyTable(headers)
     all_pages = len(contacts) // 10 + bool(len(contacts) % 10)
 
@@ -20,7 +19,6 @@ def views_contact():
         start = (page_number != 1) * (page_number - 1) * 10
         end = 10 * page_number
         table.clear_rows()
-        print(start, end)
         table.add_rows(contacts[start:end])
         print(f'Страница {page_number} из {all_pages}')
         print(table)
@@ -32,10 +30,13 @@ def views_contact():
                           '4': ['Главное меню', main_menu]}
         page_menu = [f'{key}. {value[0]}' for key, value in page_menu_dict.items()]
         if page_number == 1:
-            page_menu_list = ' | '.join(list(page_menu[2:]))
+            page_menu_list = ' | '.join(page_menu[2:])
             page_num_list = tuple(page_menu_dict)[2:]
+        elif page_number == all_pages:
+            page_menu_list = ' | '.join(elem for elem in page_menu if 'Последняя страница' not in elem)
+            page_num_list = tuple(elem for elem in page_menu_dict if 'Последняя страница' not in page_menu_dict[elem])
         else:
-            page_menu_list = ' | '.join(list(page_menu))
+            page_menu_list = ' | '.join(page_menu)
             page_num_list = tuple(page_menu_dict)
         print(page_menu_list)
         move = move_menu(page_num_list)
@@ -61,15 +62,14 @@ def views_contact():
     view_table()
 
 
-def add_contact():
+def add_contact() -> None:
     '''
-    Функция добавляющая контакты
-    :return: None
+    Функция реализующая добавление контактов в справочник пользователем
     '''
     print('\nДобавить контакт')
-    surname = input('Укажите фамилию: ')
-    name = input('Укажите имя: ')
-    patronymic = input('Укажите отчество: ')
+    surname = input('Укажите фамилию: ').capitalize()
+    name = input('Укажите имя: ').capitalize()
+    patronymic = input('Укажите отчество: ').capitalize()
     organisation = input('Укажите ораганизацию: ')
     work_number = input('Укажите рабочий номер телефона: ')
     phone_number = input('Укажите личный номер телефона: ')
@@ -101,9 +101,11 @@ def search_contact():
     print('\nНайти контакт')
 
 
-def move_menu(buttons: tuple, menu=True):
+def move_menu(buttons: tuple, menu: bool = True) -> str:
     '''
-    Функция для получения и проверки вводных данных от пользователя
+    Функция реализующая получение информации от пользователя, о перемещении по меню или страницам справочника
+    :param buttons: кортеж состоящий из "кнопок" меню или номеров страниц справочника
+    :param menu: флаг, определяющий с чем работает функция, с "кнопками" меню или номерами страниц справочника
     :return: str
     '''
     enter_massage = f'\nУкажите номер раздела в который хотите перейти: ' if menu else f'Укажите номер страницы: '
@@ -116,10 +118,10 @@ def move_menu(buttons: tuple, menu=True):
     return move
 
 
-def main_menu():
+def main_menu() -> None:
     '''
-    Функция реализующая главное меню
-    :return: None
+    Функция реализующая главное меню справочника, с помощью нее пользователь выбирает, какой функцией он хочет
+    воспользоваться
     '''
     func = {'1': views_contact, '2': add_contact, '3': edit_contact, '4': search_contact}
     print('\nЭлектронный справочник\n\tГлавное меню')
