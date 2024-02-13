@@ -37,7 +37,7 @@ class PhoneBook:
             with open('database.csv', 'w', encoding='utf-8') as file:
                 file_writer = csv.writer(file, delimiter=';', lineterminator='\r')
                 file_writer.writerow(self.headers)
-                file_writer.writerow(self.contacts)
+                file_writer.writerows(self.contacts)
 
     def views_contact(self) -> None:
         """
@@ -99,7 +99,7 @@ class PhoneBook:
             PhoneBook.view_table(self, page_number=previous_page + 1)
         elif move == '2':
             page_list = tuple(map(str, range(1, self.all_pages + 1)))
-            page_number = int(PhoneBook.move_menu(page_list, menu='page'))
+            page_number = int(PhoneBook.move_menu(page_list, flag='page'))
             PhoneBook.view_table(self, page_number=page_number)
         elif move == '3':
             PhoneBook.view_table(self, self.all_pages)
@@ -107,7 +107,8 @@ class PhoneBook:
     @staticmethod
     def move_menu(buttons: tuple | list, flag: str = 'menu') -> str:
         """
-        Функция реализующая получение информации от пользователя, о перемещении по меню или страницам справочника
+        Функция реализующая получение информации от пользователя, о перемещении по меню, страницам справочника
+        или о выборе контакта для изменения
         :param buttons: кортеж или список состоящий из "кнопок" меню или номеров страниц справочника
         :param flag: флаг, определяющий с чем работает функция, с "кнопками" меню, номерами контактов или
         страниц справочника
@@ -130,7 +131,7 @@ class PhoneBook:
 
     def contact_match(self, new_contact: list) -> bool:
         """
-        Функция, проверяющая на совпадение нового контакта с уже имеющимися
+        Функция, проверяющая на совпадение нового контакта с уже существующими
         :param new_contact: Список с данными о новом контакте
         :return:
         """
