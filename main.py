@@ -15,24 +15,38 @@ class PhoneBook:
         self.all_pages = 0
         self.page_menu = [f'{key}. {value}' for key, value in self.page_actions.items()]
 
-    def reader(self):
+    def reader(self) -> None:
+        '''
+        Функция считывает файл базы данных, сохраняет заголовок и список контактов
+        '''
         with open('database.csv', 'r', encoding='utf-8') as file:
             self.headers = file.readline().strip().split(';')
             self.contacts = sorted(csv.reader(file, delimiter=';'))
 
     @staticmethod
-    def writer(info):
+    def writer(info: list | tuple) -> None:
+        '''
+        Функция записывает информацию внесенную пользовател в БД
+        :param info: список данных для записи
+        '''
         with open('database.csv', 'a', encoding='utf-8') as file:
             file_writer = csv.writer(file, delimiter=';', lineterminator='\r')
             file_writer.writerow(info)
 
-    def views_contact(self):
+    def views_contact(self) -> None:
+        '''
+        Функция реализующая меню постраничного вывода записей из справочника на экран
+        '''
         PhoneBook.reader(self)
         self.all_pages = len(self.contacts) // 10 + bool(len(self.contacts) % 10)
         print('\nСписок контактов')
         PhoneBook.view_table(self, page_number=1)
 
-    def view_table(self, page_number):
+    def view_table(self, page_number: int) -> None:
+        '''
+        Функция выводящая таблицы с данными
+        :param page_number: Номер страницы, которую нужно вывести на экран
+        '''
         start = (page_number != 1) * (page_number - 1) * 10
         end = 10 * page_number
         table = PrettyTable(self.headers)
@@ -42,7 +56,10 @@ class PhoneBook:
         print(f'Страница {page_number} из {self.all_pages}: ')
         print(table)
 
-        if page_number == 1:
+        if self.all_pages == 1:
+            page_menu_list = self.page_menu[-1]
+            page_num_list = tuple(self.page_actions)[-1]
+        elif page_number == 1:
             page_menu_list = ' | '.join(self.page_menu[2:])
             page_num_list = tuple(self.page_actions)[2:]
         elif page_number == self.all_pages:
@@ -60,7 +77,12 @@ class PhoneBook:
         else:
             PhoneBook.main_menu(self)
 
-    def jump_page(self, move, previous_page):
+    def jump_page(self, move: str, previous_page: int) -> None:
+        '''
+        Функция осуществляющая переход по страницам справочника
+        :param move: Действие, которое хочет совершить пользователь
+        :param previous_page: Номер предыдущей страницы справочника
+        '''
         if move == '-1':
             PhoneBook.view_table(self, previous_page - 1)
         if move == '0':
@@ -92,7 +114,11 @@ class PhoneBook:
         return move
 
     @staticmethod
-    def filling_information():
+    def filling_information() -> list:
+        '''
+        Функция запрашивает данные о контакте у пользователя
+        :return: список данных введеных пользователем о контакте
+        '''
         surname = input('Укажите фамилию: ').capitalize()
         name = input('Укажите имя: ').capitalize()
         patronymic = input('Укажите отчество: ').capitalize()
@@ -100,7 +126,7 @@ class PhoneBook:
         work_number = input('Укажите рабочий номер телефона: ')
         phone_number = input('Укажите личный номер телефона: ')
 
-        return surname, name, patronymic, organisation, work_number, phone_number
+        return [surname, name, patronymic, organisation, work_number, phone_number]
 
     def add_contact(self) -> None:
         '''
@@ -117,32 +143,43 @@ class PhoneBook:
         else:
             PhoneBook.add_contact(self)
 
-    def edit_contact(self):
+    def edit_contact(self) -> None:
         '''
         Функция изменяющая контакты
         :return: None
         '''
         print('\nИзменить контакт')
 
-    def search_contact(self):
+    def search_contact(self) -> None:
         '''
-        Функция для поиска контактов
-        :return: None
+        Функция для поиска контактов. Вызывает поисковую функцию, которая осуществляет поиск и возвращает результат.
+        Полученный результат выводится на экран с помощью представления таблицы
         '''
         PhoneBook.reader(self)
         print('\nНайти контакт')
-        PhoneBook.search_engine(self)
+        self.contacts = PhoneBook.search_engine(self)
+        self.all_pages = len(self.contacts) // 10 + bool(len(self.contacts) % 10)
+        PhoneBook.view_table(self, page_number=1)
 
-    def search_engine(self):
-        print('Поиск может осуществляться по нескольким параметрам, в таком случае указывайте их через пробел')
+    def search_engine(self) -> list[list]:
+        '''
+        Поисковая функция, запрашивает у пользователя данные для поиска. Поиск осуществялется на основании частичных
+        совпадений, если пользователь внес несколько параметров для поиска, то оба должны частично совпадать с любым
+        из имеющихся параметров в таблице (аналогичное явление в поиске можно наблюдать в телефонной книге iPhone)
+        :return: Возвращает список совпадений
+        '''
+        print('Поиск может осуществляться по нескольким параметрам, в этом случае указывайте их через пробел')
         search_query = input('Введите данные для поиска: ').split()
+        result = []
         for line in self.contacts:
-            line = ' '.join(line)
+            line_string = ' '.join(line)
+            counter = len(search_query)
             for query in search_query:
-                if query in line:
-                    print(line)
-                    break
-
+                if query in line_string:
+                    counter -= 1
+            if not counter:
+                result.append(line)
+        return result
 
     def main_menu(self) -> None:
         '''
