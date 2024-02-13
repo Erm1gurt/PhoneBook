@@ -128,6 +128,14 @@ class PhoneBook:
             move = input(enter_massage)
         return move
 
+    def contact_match(self, new_contact: list) -> bool:
+        """
+        Функция, проверяющая на совпадение нового контакта с уже имеющимися
+        :param new_contact: Список с данными о новом контакте
+        :return:
+        """
+        return new_contact in self.contacts
+
     @staticmethod
     def setter(info: str, field: str | bool, flag: str = 'fio') -> str:
         """
@@ -176,8 +184,12 @@ class PhoneBook:
         """
         print('\nДобавить контакт')
         info = PhoneBook.filling_information()
-        PhoneBook.writer(self, info)
-        print('\nКонтакт успешно добавлен')
+        PhoneBook.reader(self)
+        if PhoneBook.contact_match(self, info):
+            print('\nТакой контакт уже существует\n')
+        else:
+            PhoneBook.writer(self, info)
+            print('\nКонтакт успешно добавлен')
         print('1. Вернуться в главное меню\n2. Добавить контакт')
         move = PhoneBook.move_menu(['1', '2'])
         if move == '1':
@@ -204,9 +216,19 @@ class PhoneBook:
             contact = data[move-1]
             print('Укажите данные которые нужно изменить, если поле менять не нужно, оставьте его пустым:')
             info = PhoneBook.filling_information(data=contact)
-            self.contacts.remove(contact)
-            self.contacts.append(info)
-            PhoneBook.writer(flag=True)
+            if PhoneBook.contact_match(self, info):
+                print('\nТакой контакт уже существует\n')
+            else:
+                self.contacts.remove(contact)
+                self.contacts.append(info)
+                PhoneBook.writer(self, flag=True)
+                print('Контакт успешно изменен')
+            print('1. Вернуться в главное меню\n2. Изменить контакт')
+            move = PhoneBook.move_menu(['1', '2'])
+            if move == '1':
+                PhoneBook.main_menu(self)
+            else:
+                PhoneBook.edit_contact(self)
         else:
             print('\nКонтакт с такми данными не найден, попробуйте еще раз')
             PhoneBook.edit_contact(self)
@@ -233,10 +255,10 @@ class PhoneBook:
         search_query = input('Введите данные для поиска: ').split()
         result = []
         for line in self.contacts:
-            line_string = ' '.join(line)
+            line_string = ' '.join(line).lower()
             counter = len(search_query)
             for query in search_query:
-                if query in line_string:
+                if query.lower() in line_string:
                     counter -= 1
             if not counter:
                 result.append(line)
