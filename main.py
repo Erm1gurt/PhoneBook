@@ -238,9 +238,9 @@ class PhoneBook:
         """
         surname, name, patronymic, organisation, work_number, phone_number = data or [None] * 6
 
-        surname = PhoneBook.setter('Укажите фамилию: ', surname)
-        name = PhoneBook.setter('Укажите имя: ', name)
-        patronymic = PhoneBook.setter('Укажите отчество: ', patronymic)
+        surname = PhoneBook.setter('Укажите фамилию: ', surname).capitalize()
+        name = PhoneBook.setter('Укажите имя: ', name).capitalize()
+        patronymic = PhoneBook.setter('Укажите отчество: ', patronymic).capitalize()
         organisation = PhoneBook.setter('Укажите организацию: ', organisation, flag='org')
         work_number = PhoneBook.setter('Укажите рабочий номер телефона: ', work_number, flag='num')
         phone_number = PhoneBook.setter('Укажите личный номер телефона: ', phone_number, flag='num')
@@ -261,15 +261,15 @@ class PhoneBook:
                        'num': [' может содержать только цифры и', str.isdigit],
                        'org': ['', bool]}
         if field is None:
-            field_data = input(info).capitalize()
+            field_data = input(info)
             while not setter_move[flag][1](field_data):
                 print(f'Данное поле{setter_move[flag][0]} не может быть пустым, введите корректные данные')
-                field_data = input(info).capitalize()
+                field_data = input(info)
         else:
-            field_data = input(info).capitalize() or field
+            field_data = input(info) or field
             while field_data and not setter_move[flag][1](field_data):
                 print(f'Данное поле{setter_move[flag][0]}, введите корректные данные')
-                field_data = input(info).capitalize() or field
+                field_data = input(info) or field
         return field_data
 
     def search_engine(self) -> list[list]:
